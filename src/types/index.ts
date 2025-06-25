@@ -26,6 +26,8 @@ export interface Event {
   description: string;
 }
 
+export type EventCreationData = Omit<Event, 'id' | 'organizer'>;
+
 export interface Resource {
     id: string;
     title: string;

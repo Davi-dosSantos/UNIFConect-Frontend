@@ -1,4 +1,4 @@
-import { User, Offer, Resource, Event } from "../types";
+import { User, Offer, Resource, Event, EventCreationData } from "../types";
 
 const mockUser: User = {
   id: 'uuid-user-1',
@@ -37,7 +37,21 @@ export const api = {
         return new Promise(resolve => setTimeout(() => resolve(mockOffers), 800));
     },
     getEvents: async (): Promise<Event[]> => {
-        return new Promise(resolve => setTimeout(() => resolve(mockEvents), 800));
+        return new Promise(resolve => setTimeout(() => resolve([...mockEvents]), 800));
+    },
+    createEvent: async (eventData: EventCreationData, organizer: User): Promise<Event> => {
+        console.log("Creating event:", eventData);
+        return new Promise(resolve => {
+            setTimeout(() => {
+                const newEvent: Event = {
+                    id: `uuid-event-${Date.now()}`,
+                    ...eventData,
+                    organizer: { name: organizer.name }
+                };
+                mockEvents.push(newEvent);
+                resolve(newEvent);
+            }, 1000);
+        });
     },
     getResources: async (): Promise<Resource[]> => {
         return new Promise(resolve => setTimeout(() => resolve(mockResources), 800));
