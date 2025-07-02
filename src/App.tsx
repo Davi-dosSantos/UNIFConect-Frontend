@@ -1,58 +1,41 @@
-import { useState } from "react";
-import { AuthProvider, useAuth } from './context/AuthContext';
-import { OffersPage } from "./pages/Offers";
-import { EventsPage } from "./pages/Events";
-import { ResourcesPage } from "./pages/Resources";
-import { ChatPage } from "./pages/Chat";
-import { ProfilePage } from "./pages/Profile";
-import { HomePage } from "./pages/Home";
-import { LoginPage } from "./pages/Login";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { LoginPage } from "./pages/login";
 import { RegisterPage } from "./pages/Register";
-import { ThemeProvider } from "@emotion/react";
-import { CssBaseline } from "@mui/material";
-import { DashboardLayout } from "./components/DashboardLayout";
-import { createTheme, Theme } from "@mui/material/styles";
+import { HomePage } from "./pages/Home";
+import { CreateOfferPage } from "./pages/CreateOffer";
+import { ProfilePage } from "./pages/Profile";
+import { EditProfilePage } from "./pages/EditProfile";
+import { ResourcesPage } from "./pages/Resources";
+import { MyActivitiesPage } from "./pages/MyActivities";
+import { MainLayout } from "./components/MainLayout";
 
-const theme: Theme = createTheme();
-
-function AppContent() {
-    const isAuthenticated = useAuth();
-    const [page, setPage] = useState('home');
-    const [authPage, setAuthPage] = useState('login'); // 'login' or 'register'
-
-    const renderPage = () => {
-        switch (page) {
-            case 'offers': return <OffersPage />;
-            case 'events': return <EventsPage />;
-            case 'resources': return <ResourcesPage />;
-            case 'chat': return <ChatPage />;
-            case 'profile': return <ProfilePage />;
-            case 'home':
-            default: return <HomePage />;
-        }
-    };
-
-    if (!isAuthenticated) {
-        if(authPage === 'login') {
-            return <LoginPage navigate={() => setAuthPage('register')} />;
-        }
-        return <RegisterPage navigate={() => setAuthPage('login')} />;
-    }
-
-    return (
-        <DashboardLayout currentPage={page} navigate={setPage}>
-            {renderPage()}
-        </DashboardLayout>
-    );
+function ProtectedRoutes() {
+  const token = localStorage.getItem("authToken");
+  return token ? <MainLayout /> : <Navigate to="/login" />;
 }
 
-export default function App() {
-    return (
-        <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <AuthProvider>
-                <AppContent />
-            </AuthProvider>
-        </ThemeProvider>
-    );
+function App() {
+  return (
+    <Routes>
+      {/* Rotas Públicas */}
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+
+      {/* Rotas Protegidas */}
+      <Route element={<ProtectedRoutes />}>
+        <Route path="/home" element={<HomePage />} />
+        <Route path="/offers/new" element={<CreateOfferPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/profile/edit" element={<EditProfilePage />} />
+        <Route path="/users/:userId/profile" element={<ProfilePage />} />
+        <Route path="/my-activities" element={<MyActivitiesPage />} />
+        <Route path="/resources" element={<ResourcesPage />} />{" "}
+      </Route>
+
+      {/* Rota Padrão */}
+      <Route path="*" element={<Navigate to="/home" />} />
+    </Routes>
+  );
 }
+
+export default App;

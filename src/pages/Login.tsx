@@ -1,39 +1,119 @@
-import { Box, Card, CardContent, CircularProgress, Grid, Typography, Button, CardActions, Chip, Container, Avatar, TextField, Link } from "@mui/material";
-import { useEffect, useState } from "react";
-import { useAuth } from "../context/AuthContext";
-import { Work } from "@mui/icons-material";
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import {
+  Container,
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Alert,
+  Grid,
+} from "@mui/material";
+import { api } from "../services/api";
+import { AxiosError } from "axios";
 
-interface LoginPageProps {
-    navigate: (page: 'register') => void;
-}
-export function LoginPage({ navigate }: LoginPageProps) {
-    const { login } = useAuth();
-    const [loading, setLoading] = useState(false);
+export function LoginPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-    const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        setLoading(true);
-        const data = new FormData(event.currentTarget);
-        const email = data.get('email') as string;
-        const password = data.get('password') as string;
-        await login(email, password);
-        setLoading(false);
-    };
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError("");
 
-    return (
-        <Container component="main" maxWidth="xs">
-            <Box sx={{ marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <Avatar sx={{ m: 1, bgcolor: 'primary.main' }}><Work /></Avatar>
-                <Typography component="h1" variant="h5">UNIFConect</Typography>
-                <Box component="form" onSubmit={handleLogin} noValidate sx={{ mt: 1 }}>
-                    <TextField margin="normal" required fullWidth id="email" label="Endereço de Email" name="email" autoComplete="email" autoFocus />
-                    <TextField margin="normal" required fullWidth name="password" label="Senha" type="password" id="password" autoComplete="current-password" />
-                    <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }} disabled={loading}>
-                        {loading ? <CircularProgress size={24} /> : "Entrar"}
-                    </Button>
-                    <Grid container><Grid><Link href="#" variant="body2" onClick={() => navigate('register')}>{"Não tem uma conta? Cadastre-se"}</Link></Grid></Grid>
-                </Box>
-            </Box>
-        </Container>
-    );
+    if (!email || !password) {
+      setError("Por favor, preencha todos os campos.");
+      return;
+    }
+
+    try {
+      const response = await api.post("/auth/login", {
+        email,
+        password,
+      });
+
+      const { token } = response.data;
+      localStorage.setItem("authToken", token);
+
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+      navigate("/home");
+    } catch (err) {
+      if (err instanceof AxiosError && err.response) {
+        setError(err.response.data.message || "Email ou senha inválidos.");
+      } else {
+        setError("Ocorreu um erro inesperado. Tente novamente.");
+      }
+      console.error("Erro de login:", err);
+    }
+  };
+
+  return (
+    <Container component="main" maxWidth="xs">
+      <Box
+        sx={{
+          marginTop: 8,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        <Typography component="h1" variant="h5">
+          Entrar no UNIFConect
+        </Typography>
+        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="email"
+            label="Endereço de Email"
+            name="email"
+            autoComplete="email"
+            autoFocus
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="Senha"
+            type="password"
+            id="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          {error && (
+            <Alert severity="error" sx={{ mt: 2, width: "100%" }}>
+              {error}
+            </Alert>
+          )}
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}
+          >
+            Entrar
+          </Button>
+          <Grid container justifyContent="flex-end">
+            <Grid>
+              <Link
+                to="/register"
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                <Typography variant="body2" color="primary">
+                  Ainda não tem uma conta? Cadastre-se
+                </Typography>
+              </Link>
+            </Grid>
+          </Grid>
+        </Box>
+      </Box>
+    </Container>
+  );
 }

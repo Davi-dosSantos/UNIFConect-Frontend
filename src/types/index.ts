@@ -1,36 +1,65 @@
+// Define o formato para uma Tag (matéria/tópico)
+export interface Tag {
+  id: string;
+  name: string;
+  description: string | null;
+}
+
+// Define o formato para o autor de uma oferta ou recurso
+export interface Offerer {
+  id: string;
+  name: string;
+}
+
+// Define o formato para um usuário logado
 export interface User {
   id: string;
   name: string;
   email: string;
-  bio: string;
-  role: 'student' | 'tutor' | 'admin';
+  password?: string; // Opcional, pois nunca recebemos a senha do backend
 }
 
-export interface Subject {
-    name: string;
+// Define o formato para o perfil de um usuário
+export interface Profile {
+  id: string;
+  userId: string;
+  bio: string | null;
+  course: string | null;
+  institution: string | null;
+  avatarUrl: string | null;
 }
 
+// Define o formato para uma Oferta de ajuda
 export interface Offer {
   id: string;
-  subject: Subject;
+  title: string;
   description: string;
-  user: { name: string };
-  type: 'help' | 'request';
+  slots: number;
+  createdAt: string; // As datas vêm como string da API JSON
+  offerer: Offerer;
+  tags: Tag[];
+  _count: {
+    subscriptions: number;
+  };
 }
 
-export interface Event {
+// Define o formato para um arquivo que foi enviado
+export interface File {
+  id: string;
+  originalName: string;
+  path: string; // O caminho público para acessar/baixar o arquivo
+}
+
+// Define o formato para um Recurso (material de estudo) do acervo
+export interface Resource {
   id: string;
   title: string;
-  scheduled_for: string;
-  organizer: { name: string };
   description: string;
-}
-
-export type EventCreationData = Omit<Event, 'id' | 'organizer'>;
-
-export interface Resource {
+  createdAt: string;
+  uploader: {
     id: string;
-    title: string;
-    subject: Subject;
-    added_by: { name: string };
+    name: string;
+  };
+  file: File;
+  tags: Tag[];
 }
