@@ -7,15 +7,19 @@ import {
   Box,
   CardActions,
   Button,
+  IconButton,
 } from "@mui/material";
 import type { Resource } from "../types";
 import { api } from "../services/api";
+import DeleteIcon from "@mui/icons-material/Delete";
 
+// Adicionamos a nova prop 'onDelete'
 interface ResourceCardProps {
   resource: Resource;
+  onDelete?: (resourceId: string) => void;
 }
 
-export function ResourceCard({ resource }: ResourceCardProps) {
+export function ResourceCard({ resource, onDelete }: ResourceCardProps) {
   const fileUrl = `${api.defaults.baseURL}${resource.file.path}`;
 
   return (
@@ -53,14 +57,27 @@ export function ResourceCard({ resource }: ResourceCardProps) {
           <Typography variant="caption" color="text.secondary">
             Enviado por: {resource.uploader.name}
           </Typography>
-          <Button
-            size="small"
-            href={fileUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Baixar Material
-          </Button>
+
+          <Box>
+            <Button
+              size="small"
+              href={fileUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Baixar
+            </Button>
+            {/* O botão de deletar só aparece se a função 'onDelete' for passada */}
+            {onDelete && (
+              <IconButton
+                onClick={() => onDelete(resource.id)}
+                size="small"
+                color="error"
+              >
+                <DeleteIcon />
+              </IconButton>
+            )}
+          </Box>
         </CardActions>
       </Card>
     </Grid>

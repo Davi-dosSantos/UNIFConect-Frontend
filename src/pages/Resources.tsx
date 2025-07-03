@@ -6,14 +6,46 @@ import {
   Alert,
   Divider,
   Button,
+  Snackbar,
 } from "@mui/material";
 import { useResources } from "../hooks/useResources";
 import { ResourceCard } from "../components/ResourceCard";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { jwtDecode } from "jwt-decode";
+import { api } from "../services/api";
 
 export function ResourcesPage() {
-  const { resources, loading, error } = useResources();
+  const { resources, loading, error, refetchResources } = useResources();
   const navigate = useNavigate();
+
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+
+  const token = localStorage.getItem("authToken");
+  const loggedInUserId = token ? (jwtDecode(token) as { id: string }).id : null;
+
+  const handleDeleteResource = async (resourceId: string) => {
+    if (
+      !window.confirm(
+        "Tem certeza que deseja deletar este material? Esta ação não pode ser desfeita."
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await api.delete(`/resources/${resourceId}`);
+      setSnackbarMessage("Recurso deletado com sucesso!");
+      setSnackbarOpen(true);
+
+      refetchResources();
+    } catch (err) {
+      console.error("Erro ao deletar recurso:", err);
+      setSnackbarMessage("Não foi possível deletar o recurso.");
+      setSnackbarOpen(true);
+    }
+  };
 
   if (loading) {
     return (
@@ -54,10 +86,25 @@ export function ResourcesPage() {
           </Grid>
         ) : (
           resources.map((resource) => (
-            <ResourceCard key={resource.id} resource={resource} />
+            <ResourceCard
+              key={resource.id}
+              resource={resource}
+              onDelete={
+                loggedInUserId === resource.uploader.id
+                  ? handleDeleteResource
+                  : undefined
+              }
+            />
           ))
         )}
       </Grid>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={() => setSnackbarOpen(false)}
+        message={snackbarMessage}
+      />
     </Box>
   );
 }
