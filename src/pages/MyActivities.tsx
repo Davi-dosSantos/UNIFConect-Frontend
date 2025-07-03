@@ -69,7 +69,7 @@ export function MyActivitiesPage() {
     fetchData();
   }, []);
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setCurrentTab(newValue);
   };
 
@@ -125,7 +125,7 @@ export function MyActivitiesPage() {
   };
 
   const handleCloseSnackbar = (
-    event?: React.SyntheticEvent | Event,
+    _event?: React.SyntheticEvent | Event,
     reason?: string
   ) => {
     if (reason === "clickaway") return;
