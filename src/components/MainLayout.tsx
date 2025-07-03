@@ -20,7 +20,7 @@ import Logout from "@mui/icons-material/Logout";
 import FolderIcon from "@mui/icons-material/Folder";
 import { Footer } from "./Footer";
 import { useUserProfile } from "../hooks/useUserProfile";
-
+import logoBranco from "../assets/UNIFConect_LogoBranco.svg";
 interface UserPayload {
   id: string;
   name: string;
@@ -76,6 +76,16 @@ export function MainLayout() {
               cursor: "pointer",
             }}
           >
+            <img
+              src={logoBranco} // Use a variável entre chaves {}
+              alt="Logo Unifconect"
+              style={{
+                width: 40,
+                height: 40,
+                marginRight: 8,
+                verticalAlign: "middle",
+              }}
+            />
             UNIFConect
           </Typography>
 
