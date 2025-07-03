@@ -89,7 +89,7 @@ export function CreateOfferPage() {
         required
         fullWidth
         id="title"
-        label="Título da sua oferta"
+        label="Título da sua atividade"
         name="title"
         autoFocus
         value={title}
@@ -100,7 +100,7 @@ export function CreateOfferPage() {
         required
         fullWidth
         name="description"
-        label="Descreva o que você vai ensinar"
+        label="Descreva a atividade"
         id="description"
         multiline
         rows={4}

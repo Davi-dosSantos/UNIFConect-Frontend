@@ -227,7 +227,7 @@ export function MyActivitiesPage() {
             Vagas
           </Typography>
           <Typography>
-            {selectedOffer?._count.subscriptions} / {selectedOffer?.slots}{" "}
+            {selectedOffer?._count?.subscriptions ?? 0} / {selectedOffer?.slots}
             inscritos
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mt: 3 }}>
