@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { LoginPage } from "./pages/login";
+import { LoginPage } from "./pages/Login";
 import { RegisterPage } from "./pages/Register";
 import { HomePage } from "./pages/Home";
 import { CreateOfferPage } from "./pages/CreateOffer";
