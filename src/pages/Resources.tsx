@@ -5,12 +5,15 @@ import {
   CircularProgress,
   Alert,
   Divider,
+  Button,
 } from "@mui/material";
 import { useResources } from "../hooks/useResources";
 import { ResourceCard } from "../components/ResourceCard";
+import { useNavigate } from "react-router-dom";
 
 export function ResourcesPage() {
   const { resources, loading, error } = useResources();
+  const navigate = useNavigate();
 
   if (loading) {
     return (
@@ -26,10 +29,21 @@ export function ResourcesPage() {
 
   return (
     <Box>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Acervo de Materiais
-      </Typography>
-      <Divider sx={{ mb: 4 }} />
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <Typography variant="h4" component="h1" gutterBottom>
+          Acervo de Materiais
+        </Typography>
+        <Button variant="contained" onClick={() => navigate("/resources/new")}>
+          + Adicionar Material
+        </Button>
+      </Box>
+      <Divider sx={{ my: 2 }} />
 
       <Grid container spacing={4}>
         {resources.length === 0 ? (

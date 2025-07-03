@@ -19,6 +19,7 @@ import AccountCircle from "@mui/icons-material/AccountCircle";
 import Logout from "@mui/icons-material/Logout";
 import FolderIcon from "@mui/icons-material/Folder";
 import { Footer } from "./Footer";
+import { useUserProfile } from "../hooks/useUserProfile";
 
 interface UserPayload {
   id: string;
@@ -27,6 +28,7 @@ interface UserPayload {
 
 export function MainLayout() {
   const navigate = useNavigate();
+  const { profile } = useUserProfile();
   const [user, setUser] = useState<UserPayload | null>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -92,8 +94,11 @@ export function MainLayout() {
               Olá, {user?.name || "Usuário"}
             </Typography>
             <IconButton size="large" onClick={handleMenu} color="inherit">
-              <Avatar sx={{ width: 32, height: 32 }}>
-                <AccountCircle />
+              <Avatar
+                src={profile?.avatarUrl || ""}
+                sx={{ width: 32, height: 32 }}
+              >
+                {!profile?.avatarUrl && <AccountCircle />}
               </Avatar>
             </IconButton>
             <Menu

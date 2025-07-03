@@ -8,6 +8,7 @@ import { EditProfilePage } from "./pages/EditProfile";
 import { ResourcesPage } from "./pages/Resources";
 import { MyActivitiesPage } from "./pages/MyActivities";
 import { MainLayout } from "./components/MainLayout";
+import { CreateResourcePage } from "./pages/CreateResource";
 
 function ProtectedRoutes() {
   const token = localStorage.getItem("authToken");
@@ -30,6 +31,7 @@ function App() {
         <Route path="/users/:userId/profile" element={<ProfilePage />} />
         <Route path="/my-activities" element={<MyActivitiesPage />} />
         <Route path="/resources" element={<ResourcesPage />} />{" "}
+        <Route path="/resources/new" element={<CreateResourcePage />} />
       </Route>
 
       {/* Rota Padrão */}

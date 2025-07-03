@@ -12,10 +12,8 @@ import type { Offer } from "../types";
 
 interface OfferCardProps {
   offer: Offer;
-  // Ação principal (ex: Cancelar Inscrição)
   primaryActionText?: string;
   onPrimaryAction?: (offer: Offer) => void;
-  // Ação secundária (ex: Ver Mais)
   secondaryActionText?: string;
   onSecondaryAction?: (offer: Offer) => void;
 }
@@ -27,7 +25,8 @@ export function OfferCard({
   secondaryActionText,
   onSecondaryAction,
 }: OfferCardProps) {
-  const isFull = offer._count.subscriptions >= offer.slots;
+  const subscriptionCount = offer._count?.subscriptions ?? 0;
+  const isFull = subscriptionCount >= offer.slots;
 
   return (
     <Grid size={{ xs: 12, sm: 6, md: 4 }}>

@@ -18,6 +18,7 @@ import {
 import { api } from "../services/api";
 import { jwtDecode } from "jwt-decode";
 import { OfferCard } from "../components/OfferCard";
+import { useOfferModal } from "../hooks/useOfferModal";
 import type { Offer } from "../types";
 import { AxiosError } from "axios";
 
@@ -28,16 +29,25 @@ export function MyActivitiesPage() {
   const [error, setError] = useState("");
   const [currentTab, setCurrentTab] = useState(0);
 
-  const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // Usando o hook para controlar o modal
+  const { isModalOpen, selectedOffer, handleOpenModal, handleCloseModal } =
+    useOfferModal();
+
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [, setSnackbarSeverity] = useState<"success" | "error">("success");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
+    "success"
+  );
 
   const fetchData = async () => {
     try {
+      setLoading(true);
       const token = localStorage.getItem("authToken");
-      if (!token) return;
+      if (!token) {
+        setError("Usuário não autenticado.");
+        setLoading(false);
+        return;
+      }
 
       const { id: userId } = jwtDecode(token) as { id: string };
 
@@ -48,14 +58,8 @@ export function MyActivitiesPage() {
       setMyOffers(offersResponse.data);
       setMySubscriptions(subscriptionsResponse.data);
     } catch (err) {
-      if (err instanceof AxiosError && err.response) {
-        setError(
-          err.response.data.message ||
-            "Não foi possível carregar suas atividades."
-        );
-      } else {
-        setError("Ocorreu um erro inesperado.");
-      }
+      setError("Não foi possível carregar suas atividades.");
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -69,15 +73,7 @@ export function MyActivitiesPage() {
     setCurrentTab(newValue);
   };
 
-  const handleOpenModal = (offer: Offer) => {
-    setSelectedOffer(offer);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
-
+  // As funções de inscrever e desinscrever agora vivem aqui
   const handleSubscribe = async () => {
     if (!selectedOffer) return;
     try {
@@ -86,7 +82,7 @@ export function MyActivitiesPage() {
       setSnackbarSeverity("success");
       setSnackbarOpen(true);
       handleCloseModal();
-      fetchData();
+      fetchData(); // Re-busca os dados para atualizar as listas
     } catch (err) {
       if (err instanceof AxiosError && err.response) {
         setSnackbarMessage(
@@ -101,6 +97,7 @@ export function MyActivitiesPage() {
   };
 
   const handleUnsubscribe = async (offerToUnsubscribe: Offer) => {
+    // A confirmação agora acontece dentro do modal ou no clique direto
     if (
       !window.confirm(
         `Tem certeza que deseja cancelar sua inscrição em "${offerToUnsubscribe.title}"?`
@@ -108,17 +105,17 @@ export function MyActivitiesPage() {
     ) {
       return;
     }
+
     try {
       await api.delete(`/offers/${offerToUnsubscribe.id}/subscribe`);
       setSnackbarMessage("Inscrição cancelada com sucesso!");
       setSnackbarSeverity("success");
       setSnackbarOpen(true);
-      fetchData();
+      if (isModalOpen) handleCloseModal();
+      fetchData(); // Re-busca os dados para atualizar as listas
     } catch (err) {
       if (err instanceof AxiosError && err.response) {
-        setSnackbarMessage(
-          err.response.data.message || "Erro ao cancelar a inscrição."
-        );
+        setSnackbarMessage("Erro ao cancelar a inscrição.");
       } else {
         setSnackbarMessage("Ocorreu um erro inesperado.");
       }
@@ -143,6 +140,7 @@ export function MyActivitiesPage() {
     );
   if (error) return <Alert severity="error">{error}</Alert>;
 
+  // Verificação de inscrição para o botão do modal
   const isSubscribedToSelectedOffer = mySubscriptions.some(
     (sub) => sub.id === selectedOffer?.id
   );
@@ -159,6 +157,7 @@ export function MyActivitiesPage() {
         </Tabs>
       </Box>
 
+      {/* Aba de Minhas Ofertas */}
       {currentTab === 0 && (
         <Grid container spacing={4}>
           {myOffers.length > 0 ? (
@@ -166,18 +165,19 @@ export function MyActivitiesPage() {
               <OfferCard
                 key={offer.id}
                 offer={offer}
-                onPrimaryAction={handleOpenModal}
                 primaryActionText="Ver Detalhes"
+                onPrimaryAction={handleOpenModal}
               />
             ))
           ) : (
-            <Typography sx={{ ml: 2 }}>
-              Você ainda não criou nenhuma oferta.
-            </Typography>
+            <Grid size={{ xs: 12 }}>
+              <Typography>Você ainda não criou nenhuma oferta.</Typography>
+            </Grid>
           )}
         </Grid>
       )}
 
+      {/* Aba de Minhas Inscrições */}
       {currentTab === 1 && (
         <Grid container spacing={4}>
           {mySubscriptions.length > 0 ? (
@@ -192,13 +192,12 @@ export function MyActivitiesPage() {
               />
             ))
           ) : (
-            <Typography sx={{ ml: 2 }}>
-              Você não está inscrito em nenhuma oferta.
-            </Typography>
+            <Grid size={{ xs: 12 }}>
+              <Typography>Você não está inscrito em nenhuma oferta.</Typography>
+            </Grid>
           )}
         </Grid>
       )}
-
       <Dialog
         open={isModalOpen}
         onClose={handleCloseModal}
@@ -265,8 +264,15 @@ export function MyActivitiesPage() {
         open={snackbarOpen}
         autoHideDuration={4000}
         onClose={handleCloseSnackbar}
-        message={snackbarMessage}
-      />
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbarSeverity}
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }
